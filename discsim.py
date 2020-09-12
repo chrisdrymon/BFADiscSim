@@ -3,7 +3,7 @@ import math
 
 
 class Spells:
-    """Stats for direct damage spells"""
+    """Creates stats for direct damage spells"""
     def __init__(self, sp_weight, sp_bias, cast_time, cooldown):
         self.spell_damage = sp_weight*intellect + sp_bias
         self.cast_time = cast_time/(1+haste_percent)
@@ -11,7 +11,7 @@ class Spells:
 
 
 class Dots:
-    """Stats for damage-over-time spells"""
+    """Creates stats for damage-over-time spells"""
     def __init__(self, sp_weight, dot_duration, hit_interval, cast_time, cooldown):
         self.spell_damage = sp_weight*intellect*(1+haste_percent)
         self.dot_duration = dot_duration
@@ -22,7 +22,7 @@ class Dots:
 
 
 class Channeled:
-    """Stats for channeled spells"""
+    """Creates stats for channeled spells"""
     def __init__(self, sp_weight, dot_duration, hit_interval):
         self.spell_damage = sp_weight*intellect
         self.dot_duration = dot_duration
@@ -30,31 +30,46 @@ class Channeled:
 
 
 class Timeline:
+    """A timeline class which will keep track of the possible events that can occur"""
     now = 0
     schism_hit = float('inf')
     schism_off_cd = 0
 
 
 def schism_attack(fmob_hp, ftimeline):
-
-    ftimeline
+    """Modifies timeline and mob hitpoints resulting from a schism attack."""
+    fmob_hp -= schism.spell_damage
+    ftimeline.schism_hit = float('inf')
+    ftimeline.schism_off_cd = ftimeline.now + schism.cooldown
+    return fmob_hp, ftimeline
 
 
 def next_time_stop():
+    """Determines next value for timeline.now"""
     if min([timeline.schism_hit]) < float('inf'):
         return min([timeline.schism_hit])
     else:
         return min([timeline.schism_off_cd])
 
 
-def attack(fmob_hp, finsanity, ftimeline):
-    if
+def next_spell(ftimeline):
+    """After a spell is cast or a cooldown is run into, this determines which spell should be cast next."""
+    if ftimeline.now >= ftimeline.schism_off_cd:
+        ftimeline.schism_hit = ftimeline.now + schism.cast_time
+    return ftimeline
 
-# def kill_one(ftimeline, finsanity):
-#     mob_hp = int(random.randrange(mob_min_hp, mob_max_hp+1))
-#     while mob_hp > 0:
-#         now = next_time_stop()
-#         mob_hp = attack(mob_hp)
+
+def execute_time_stop(fmob_hp, ftimeline):
+    if ftimeline.now == ftimeline.schism_hit:
+        fmob_hp, ftimeline = schism_attack(fmob_hp, ftimeline)
+    return fmob_hp, ftimeline
+
+
+def kill_one(ftimeline):
+    mob_hp = int(random.randrange(mob_min_hp, mob_max_hp+1))
+    while mob_hp > 0:
+        ftimeline.now = next_time_stop()
+        mob_hp, ftimeline = execute_time_stop(mob_hp, ftimeline)
 
 
 intellect = 7189
@@ -74,11 +89,9 @@ schism = Spells(1.29, 7.77, 1.5, 12)
 timeline = Timeline
 insanity = 0
 
-mob_min_hp = 3000
-mob_max_hp = 5000
+mob_min_hp = 40000
+mob_max_hp = 50000
 
-print(timeline.shadowfiend_end)
-print(mind_blast.cast_time)
 print(f'Haste %: {haste_percent}')
 print(f'Crit chance: {crit_chance}')
 print(f'Mastery %: {mastery_percent}')
