@@ -15,9 +15,10 @@ class Dots:
     def __init__(self, sp_weight, sp_bias, dot_duration, hit_interval, cast_time, cooldown):
         self.dot_hit_damage = (sp_weight*intellect + sp_bias)/(dot_duration/hit_interval)
         self.dot_hit_interval = hit_interval / (1+haste_percent)
+        self.dot_duration = dot_duration
         self.cast_time = cast_time/(1+haste_percent)
-        # Check to see if cooldowns change with haste
         self.cooldown = cooldown
+        self.last_hit_coeff = 0
 
 
 class Channeled:
@@ -37,7 +38,9 @@ class Timeline:
     # Schism Debuff increases damage taken by 40% for 9 seconds.
     schism_debuff_end = 0
     pain_dd_hit = float('inf')
+    pain_dot_hit = float('inf')
     pain_dot_end = 0
+    pain_dot_last_hit = float('inf')
     smite_hit = float('inf')
 
 
@@ -81,13 +84,13 @@ def pain_dd_attack(fmob_hp, ftimeline):
         fmob_hp -= damage
         print(f'Mob HP: {fmob_hp}.')
     ftimeline.pain_dd_hit = float('inf')
-    ftimeline.pain_dot_end = ftimeline.now + 18
+    ftimeline.pain_dot_end = ftimeline.now + pain_dot.dot_duration
+    ftimeline.pain_dot_hit = ftimeline.now + pain_dot.dot_hit_interval
     ftimeline.gcd_end = ftimeline.now + global_cd.cast_time
-    # Add pain_dot_attack to timeline here
     return fmob_hp, ftimeline
 
 
-def pain_dot_attack(fmob_hp, ftimeline):
+def pain_dot_attack(fmob_hp, ftimeline, fpain_dot):
     """Adjusts timeline and hitpoints after a SW: Pain DoT hit."""
     crit_boolean = random.choices([True, False], weights=[crit_chance, 1-crit_chance])[0]
     if ftimeline.now <= ftimeline.schism_debuff_end:
@@ -96,18 +99,41 @@ def pain_dot_attack(fmob_hp, ftimeline):
         schism_buff = False
     damage = int(pain_dd.spell_damage*(1+versatility_percent)*(1+schism_buff*0.4))
     if crit_boolean:
-        print(f'SW: Pain DD crit for {damage*2} at {ftimeline.now:.2f}s.')
+        print(f'SW: Pain DoT crit for {damage*2} at {ftimeline.now:.2f}s.')
         fmob_hp -= damage*2
         print(f'Mob HP: {fmob_hp}.')
     else:
-        print(f'SW: Pain DD hit for {damage} at {ftimeline.now:.2f}s.')
+        print(f'SW: Pain DoT hit for {damage} at {ftimeline.now:.2f}s.')
         fmob_hp -= damage
         print(f'Mob HP: {fmob_hp}.')
-    ftimeline.pain_dd_hit = float('inf')
-    ftimeline.gcd_end = ftimeline.now + global_cd.cast_time
-    # Change this as soon as the pain_dot class object is set up. Replace 18 with pain_dot.duration or whatever.
-    ftimeline.pain_dot_end = ftimeline.now + 18
-    # Add pain_dot_attack to timeline here
+    # This sets when the next dot hit will occur.
+    if ftimeline.now + fpain_dot.dot_hit_interval <= ftimeline.pain_dot_end:
+        ftimeline.pain_dot_hit = ftimeline.now + fpain_dot.dot_hit_interval
+    else:
+        fpain_dot.last_hit_coeff = (ftimeline.pain_dot_end - ftimeline.now)/fpain_dot.dot_hit_interval
+        ftimeline.pain_dot_last_hit = ftimeline.pain_dot_end
+        ftimeline.pain_dot_hit = float('inf')
+    return fmob_hp, ftimeline, fpain_dot
+
+
+def pain_last_dot_attack(fmob_hp, ftimeline, fpain_dot):
+    """Adjusts timeline and hitpoints after a SW: Pain DoT hit."""
+    crit_boolean = random.choices([True, False], weights=[crit_chance, 1-crit_chance])[0]
+    if ftimeline.now <= ftimeline.schism_debuff_end:
+        schism_buff = True
+    else:
+        schism_buff = False
+    damage = int(pain_dd.spell_damage*(1+versatility_percent)*(1+schism_buff*0.4)*fpain_dot.last_hit_coeff)
+    if crit_boolean:
+        print(f'SW: Pain DoT crit for {damage*2} at {ftimeline.now:.2f}s.')
+        fmob_hp -= damage*2
+        print(f'Mob HP: {fmob_hp}.')
+    else:
+        print(f'SW: Pain DoT hit for {damage} at {ftimeline.now:.2f}s.')
+        fmob_hp -= damage
+        print(f'Mob HP: {fmob_hp}.')
+    ftimeline.pain_dot_end = 0
+    ftimeline.pain_dot_last_hit = float('inf')
     return fmob_hp, ftimeline
 
 
@@ -135,7 +161,8 @@ def smite_attack(fmob_hp, ftimeline):
 def next_time_stop():
     """Determines next value for timeline.now"""
     # Values that default to zero can't be included in the list or they'll be the min value every time.
-    events_list = [timeline.schism_hit, timeline.pain_dd_hit, timeline.gcd_end, timeline.smite_hit]
+    events_list = [timeline.schism_hit, timeline.pain_dd_hit, timeline.gcd_end, timeline.smite_hit,
+                   timeline.pain_dot_hit, timeline.pain_dot_last_hit]
     # if timeline.timeline.pain_dot_end > 0:
     #     events_list.append(timeline.pain_dot_end)
     return min(events_list)
@@ -152,9 +179,13 @@ def next_spell(ftimeline):
     return ftimeline
 
 
-def execute_time_stop(fmob_hp, ftimeline):
+def execute_time_stop(fmob_hp, ftimeline, fpain_dot):
     """Given a timestop, this determines which action should be taken."""
-    if ftimeline.now == ftimeline.schism_hit:
+    if ftimeline.now == ftimeline.pain_dot_hit:
+        fmob_hp, ftimeline, fpain_dot = pain_dot_attack(fmob_hp, ftimeline, fpain_dot)
+    elif ftimeline.now == ftimeline.pain_dot_last_hit:
+        fmob_hp, ftimeline = pain_last_dot_attack(fmob_hp, ftimeline, fpain_dot)
+    elif ftimeline.now == ftimeline.schism_hit:
         fmob_hp, ftimeline = schism_attack(fmob_hp, ftimeline)
     elif ftimeline.now == ftimeline.pain_dd_hit:
         fmob_hp, ftimeline = pain_dd_attack(fmob_hp, ftimeline)
@@ -166,18 +197,18 @@ def execute_time_stop(fmob_hp, ftimeline):
     # I don't think I need this, but I'll keep it for a little bit.
     # else:
     #     ftimeline = next_spell(ftimeline)
-    return fmob_hp, ftimeline
+    return fmob_hp, ftimeline, fpain_dot
 
 
-def kill_one(ftimeline, fmob_num):
+def kill_one(ftimeline, fmob_num, fpain_dot):
     mob_hp = int(random.randrange(mob_min_hp, mob_max_hp+1))
     print(f'Mob {fmob_num} HP: {mob_hp}.')
     ftimeline = next_spell(ftimeline)
     while mob_hp > 0:
         ftimeline.now = next_time_stop()
-        mob_hp, ftimeline = execute_time_stop(mob_hp, ftimeline)
+        mob_hp, ftimeline, fpain_dot = execute_time_stop(mob_hp, ftimeline, fpain_dot)
     print(f'Mob {fmob_num} died at {ftimeline.now:.2f}.')
-    return ftimeline, fmob_num
+    return ftimeline, fmob_num, fpain_dot
 
 
 intellect = 7189
@@ -195,7 +226,7 @@ global_cd = Spells(0, 0, 1.5, 0)
 schism = Spells(1.29, 7.77, 1.5, 24)
 pain_dd = Spells(0.165, 0.858, 0, 0)
 smite = Spells(0.57, 3.26, 1.5, 0)
-# pain_dot = Dots()
+pain_dot = Dots(0.992, 1.31, 16, 2, 0, 0)
 
 timeline = Timeline
 insanity = 0
@@ -209,4 +240,4 @@ print(f'Crit: {crit_chance:.2%}')
 print(f'Mastery: {mastery_percent:.2%}')
 print(f'Versatility: {versatility_percent:.2%}\n')
 
-timeline, mob_number = kill_one(timeline, mob_number)
+timeline, mob_number, pain_dot = kill_one(timeline, mob_number, pain_dot)
