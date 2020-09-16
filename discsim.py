@@ -1,5 +1,4 @@
 import random
-import math
 
 
 class Spells:
@@ -300,9 +299,6 @@ def execute_time_stop(fmob_hp, ftimeline, fpain_dot, fpenance, fdivine_star):
         fmob_hp, ftimeline, fpenance = penance_attack(fmob_hp, ftimeline, fpenance)
     elif ftimeline.now == ftimeline.solace_hit:
         fmob_hp, ftimeline = solace_attack(fmob_hp, ftimeline)
-    # I don't think I need this, but I'll keep it for a little bit.
-    # else:
-    #     ftimeline = next_spell(ftimeline)
     return fmob_hp, ftimeline, fpain_dot, fpenance, fdivine_star
 
 
