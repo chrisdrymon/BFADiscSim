@@ -27,7 +27,15 @@ class Channeled:
         self.hit_damage = (sp_weight*intellect + sp_bias)/hits
         self.hit_interval = (channel_duration / (1+haste_percent))/hits
         self.cooldown = cooldown
-        self.hit_counter = 1
+        self.hit_count = 1
+
+
+class Star:
+    """Creates stats for Divine Star"""
+    def __init__(self, sp_weight, sp_bias, cooldown):
+        self.hit_damage = (sp_weight*intellect + sp_bias)/2
+        self.cooldown = cooldown
+        self.hit_count = 1
 
 
 class Timeline:
@@ -45,6 +53,10 @@ class Timeline:
     smite_hit = float('inf')
     penance_hit = float('inf')
     penance_off_cd = 0
+    solace_hit = float('inf')
+    solace_off_cd = 0
+    divine_star_hit = float('inf')
+    divine_star_off_cd = 0
 
 
 def schism_attack(fmob_hp, ftimeline):
@@ -156,16 +168,68 @@ def penance_attack(fmob_hp, ftimeline, fpenance):
         print(f'Penance hit for {damage} at {ftimeline.now:.2f}s.')
         fmob_hp -= damage
         print(f'Mob HP: {fmob_hp}.')
-    if fpenance.hit_counter == 1:
+    if fpenance.hit_count == 1:
         ftimeline.penance_off_cd = ftimeline.now + fpenance.cooldown
-    if fpenance.hit_counter < 3:
+    if fpenance.hit_count < 3:
         ftimeline.penance_hit = ftimeline.now + fpenance.hit_interval
     else:
         ftimeline.penance_hit = float('inf')
         ftimeline = next_spell(ftimeline)
-        fpenance.hit_counter = 0
-    fpenance.hit_counter += 1
+        fpenance.hit_count = 0
+    fpenance.hit_count += 1
     return fmob_hp, ftimeline, fpenance
+
+
+def solace_attack(fmob_hp, ftimeline):
+    """Adjusts timeline and hitpoints after a Solace attack."""
+    crit_boolean = random.choices([True, False], weights=[crit_chance, 1-crit_chance])[0]
+    if ftimeline.now <= ftimeline.schism_debuff_end:
+        schism_buff = True
+    else:
+        schism_buff = False
+    damage = int(solace.spell_damage*(1+versatility_percent)*(1+schism_buff*0.4))
+    if crit_boolean:
+        print(f'Solace crit for {damage*2} at {ftimeline.now:.2f}s.')
+        fmob_hp -= damage*2
+        print(f'Mob HP: {fmob_hp}.')
+    else:
+        print(f'Solace hit for {damage} at {ftimeline.now:.2f}s.')
+        fmob_hp -= damage
+        print(f'Mob HP: {fmob_hp}.')
+    ftimeline.solace_hit = float('inf')
+    ftimeline.solace_off_cd = ftimeline.now + solace.cooldown
+    ftimeline.gcd_end = ftimeline.now + global_cd.cast_time
+    return fmob_hp, ftimeline
+
+
+def divine_star_attack(fmob_hp, ftimeline, fdivine_star):
+    """Adjusts timeline and hitpoints after a Divine Star attack."""
+    crit_boolean = random.choices([True, False], weights=[crit_chance, 1 - crit_chance])[0]
+    if ftimeline.now <= ftimeline.schism_debuff_end:
+        schism_buff = True
+    else:
+        schism_buff = False
+    damage = int(fdivine_star.hit_damage * (1 + versatility_percent) * (1 + schism_buff * 0.4))
+    if crit_boolean:
+        print(f'Divine Star crit for {damage * 2} at {ftimeline.now:.2f}s.')
+        fmob_hp -= damage * 2
+        print(f'Mob HP: {fmob_hp}.')
+    else:
+        print(f'Divine Star hit for {damage} at {ftimeline.now:.2f}s.')
+        fmob_hp -= damage
+        print(f'Mob HP: {fmob_hp}.')
+    if fdivine_star.hit_count == 1:
+        ftimeline.divine_star_off_cd = ftimeline.now + fdivine_star.cooldown
+        ftimeline.gcd_end = ftimeline.now + global_cd.cooldown
+        # This is fairly arbitrary. Divine Star goes some distance and then turns around and hits everything again on
+        # the way back. I'll just estimate that the first hit is instantaneous and the second occurs 1.5 seconds later.
+        # Haste seems to have no effect on this spell.
+        ftimeline.divine_star_hit = ftimeline.now + 1.5
+    else:
+        ftimeline.divine_star_hit = float('inf')
+        fdivine_star.hit_count = 0
+    fdivine_star.hit_count += 1
+    return fmob_hp, ftimeline, fdivine_star
 
 
 def smite_attack(fmob_hp, ftimeline):
@@ -193,9 +257,8 @@ def next_time_stop():
     """Determines next value for timeline.now"""
     # Values that default to zero can't be included in the list or they'll be the min value every time.
     events_list = [timeline.schism_hit, timeline.pain_dd_hit, timeline.gcd_end, timeline.smite_hit,
-                   timeline.pain_dot_hit, timeline.pain_dot_last_hit, timeline.penance_hit]
-    # if timeline.timeline.pain_dot_end > 0:
-    #     events_list.append(timeline.pain_dot_end)
+                   timeline.pain_dot_hit, timeline.pain_dot_last_hit, timeline.penance_hit, timeline.solace_hit,
+                   timeline.divine_star_hit]
     return min(events_list)
 
 
@@ -207,17 +270,23 @@ def next_spell(ftimeline):
         ftimeline.pain_dd_hit = ftimeline.now
     elif ftimeline.now >= ftimeline.penance_off_cd:
         ftimeline.penance_hit = ftimeline.now
+    elif ftimeline.now >= ftimeline.solace_off_cd:
+        ftimeline.solace_hit = ftimeline.now
+    elif ftimeline.now >= ftimeline.divine_star_off_cd:
+        ftimeline.divine_star_hit = ftimeline.now
     else:
         ftimeline.smite_hit = ftimeline.now + smite.cast_time
     return ftimeline
 
 
-def execute_time_stop(fmob_hp, ftimeline, fpain_dot, fpenance):
+def execute_time_stop(fmob_hp, ftimeline, fpain_dot, fpenance, fdivine_star):
     """Given a timestop, this determines which action should be taken."""
     if ftimeline.now == ftimeline.pain_dot_hit:
         fmob_hp, ftimeline, fpain_dot = pain_dot_attack(fmob_hp, ftimeline, fpain_dot)
     elif ftimeline.now == ftimeline.pain_dot_last_hit:
         fmob_hp, ftimeline = pain_last_dot_attack(fmob_hp, ftimeline, fpain_dot)
+    elif ftimeline.now == ftimeline.divine_star_hit:
+        fmob_hp, ftimeline, fdivine_star = divine_star_attack(fmob_hp, ftimeline, fdivine_star)
     elif ftimeline.now == ftimeline.schism_hit:
         fmob_hp, ftimeline = schism_attack(fmob_hp, ftimeline)
     elif ftimeline.now == ftimeline.pain_dd_hit:
@@ -229,21 +298,24 @@ def execute_time_stop(fmob_hp, ftimeline, fpain_dot, fpenance):
         fmob_hp, ftimeline = smite_attack(fmob_hp, ftimeline)
     elif ftimeline.now == ftimeline.penance_hit:
         fmob_hp, ftimeline, fpenance = penance_attack(fmob_hp, ftimeline, fpenance)
+    elif ftimeline.now == ftimeline.solace_hit:
+        fmob_hp, ftimeline = solace_attack(fmob_hp, ftimeline)
     # I don't think I need this, but I'll keep it for a little bit.
     # else:
     #     ftimeline = next_spell(ftimeline)
-    return fmob_hp, ftimeline, fpain_dot
+    return fmob_hp, ftimeline, fpain_dot, fpenance, fdivine_star
 
 
-def kill_one(ftimeline, fmob_num, fpain_dot, fpenance):
+def kill_one(ftimeline, fmob_num, fpain_dot, fpenance, fdivine_star):
     mob_hp = int(random.randrange(mob_min_hp, mob_max_hp+1))
     print(f'Mob {fmob_num} HP: {mob_hp}.')
     ftimeline = next_spell(ftimeline)
     while mob_hp > 0:
         ftimeline.now = next_time_stop()
-        mob_hp, ftimeline, fpain_dot = execute_time_stop(mob_hp, ftimeline, fpain_dot, fpenance)
+        mob_hp, ftimeline, fpain_dot, fpenance, fdivine_star = execute_time_stop(mob_hp, ftimeline, fpain_dot,
+                                                                                 fpenance, fdivine_star)
     print(f'Mob {fmob_num} died at {ftimeline.now:.2f}.')
-    return ftimeline, fmob_num, fpain_dot, fpenance
+    return ftimeline, fmob_num, fpain_dot, fpenance, fdivine_star
 
 
 intellect = 7189
@@ -261,19 +333,20 @@ global_cd = Spells(0, 0, 1.5, 0)
 schism = Spells(1.29, 7.77, 1.5, 24)
 pain_dd = Spells(0.165, 0.858, 0, 0)
 smite = Spells(0.57, 3.26, 1.5, 0)
+solace = Spells(0.829, 5.11, 0, 12)
 pain_dot = Dots(0.992, 1.31, 16, 2, 0, 0)
 penance = Channeled(1.2, 0.726, 3, 2, 9)
+divine_star = Star(0.8, 0, 15)
 
 timeline = Timeline
-insanity = 0
 mob_number = 1
 
-mob_min_hp = 40000
-mob_max_hp = 172000
+mob_min_hp = 1000000
+mob_max_hp = 1000000
 
 print(f'Haste: {haste_percent:.2%}')
 print(f'Crit: {crit_chance:.2%}')
 print(f'Mastery: {mastery_percent:.2%}')
 print(f'Versatility: {versatility_percent:.2%}\n')
 
-timeline, mob_number, pain_dot, penance = kill_one(timeline, mob_number, pain_dot, penance)
+timeline, mob_number, pain_dot, penance, divine_star = kill_one(timeline, mob_number, pain_dot, penance, divine_star)
