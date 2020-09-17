@@ -1,5 +1,7 @@
 import random
 from flask import Blueprint
+import pandas as pd
+import plotly.express as px
 import plotly.graph_objects as go
 import dash
 import dash_core_components as dcc
@@ -56,11 +58,13 @@ class Log:
         self.time_list = []
         self.spell_list = []
         self.damage_list = []
+        self.color_list = []
 
-    def update_log(self, time, spell, damage):
+    def update(self, time, spell, damage, color):
         self.time_list.append(time)
         self.spell_list.append(spell)
         self.damage_list.append(damage)
+        self.color_list.append(color)
 
 
 class Timeline:
@@ -94,12 +98,12 @@ def schism_attack(fmob_hp, ftimeline, flog):
     damage = int(schism.spell_damage*(1+versatility_percent)*(1+schism_buff*0.4))
     if crit_boolean:
         print(f'Schism crit for {damage*2} at {ftimeline.now:.2f}s.')
-        flog.update_log(ftimeline.now, 'Schism', damage*2)
+        flog.update(ftimeline.now, 'Schism', damage*2, '#26272D')
         fmob_hp -= damage*2
         print(f'Mob HP: {fmob_hp}.')
     else:
         print(f'Schism hit for {damage} at {ftimeline.now:.2f}s.')
-        flog.update_log(ftimeline.now, 'Schism', damage)
+        flog.update(ftimeline.now, 'Schism', damage, '#26272D')
         fmob_hp -= damage
         print(f'Mob HP: {fmob_hp}.')
     ftimeline.schism_hit = float('inf')
@@ -119,12 +123,12 @@ def pain_dd_attack(fmob_hp, ftimeline, flog):
     damage = int(pain_dd.spell_damage*(1+versatility_percent)*(1+schism_buff*0.4))
     if crit_boolean:
         print(f'SW: Pain DD crit for {damage*2} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'SW: Pain DD', damage*2)
+        flog.update(ftimeline.now, 'SW: Pain Initial Hit', damage*2, '#C52D2D')
         fmob_hp -= damage*2
         print(f'Mob HP: {fmob_hp}.')
     else:
         print(f'SW: Pain DD hit for {damage} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'SW: Pain DD', damage)
+        flog.update(ftimeline.now, 'SW: Pain Initial Hit', damage, '#C52D2D')
         fmob_hp -= damage
         print(f'Mob HP: {fmob_hp}.')
     ftimeline.pain_dd_hit = float('inf')
@@ -144,12 +148,12 @@ def pain_dot_attack(fmob_hp, ftimeline, fpain_dot, flog):
     damage = int(pain_dd.spell_damage*(1+versatility_percent)*(1+schism_buff*0.4))
     if crit_boolean:
         print(f'SW: Pain DoT crit for {damage*2} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'SW: Pain DoT', damage*2)
+        flog.update(ftimeline.now, 'SW: Pain DoT', damage*2, '#C52D2D')
         fmob_hp -= damage*2
         print(f'Mob HP: {fmob_hp}.')
     else:
         print(f'SW: Pain DoT hit for {damage} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'SW: Pain DoT', damage)
+        flog.update(ftimeline.now, 'SW: Pain DoT', damage, '#C52D2D')
         fmob_hp -= damage
         print(f'Mob HP: {fmob_hp}.')
     # This sets when the next dot hit will occur.
@@ -172,12 +176,12 @@ def pain_last_dot_attack(fmob_hp, ftimeline, fpain_dot, flog):
     damage = int(pain_dd.spell_damage*(1+versatility_percent)*(1+schism_buff*0.4)*fpain_dot.last_hit_coeff)
     if crit_boolean:
         print(f'SW: Pain DoT crit for {damage*2} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'SW: Pain DoT', damage*2)
+        flog.update(ftimeline.now, 'SW: Pain DoT', damage*2, '#C52D2D')
         fmob_hp -= damage*2
         print(f'Mob HP: {fmob_hp}.')
     else:
         print(f'SW: Pain DoT hit for {damage} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'SW: Pain DoT', damage)
+        flog.update(ftimeline.now, 'SW: Pain DoT', damage, '#C52D2D')
         fmob_hp -= damage
         print(f'Mob HP: {fmob_hp}.')
     ftimeline.pain_dot_end = 0
@@ -195,12 +199,12 @@ def penance_attack(fmob_hp, ftimeline, fpenance, flog):
     damage = int(fpenance.hit_damage*(1+versatility_percent)*(1+schism_buff*0.4))
     if crit_boolean:
         print(f'Penance crit for {damage*2} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'Penance', damage*2)
+        flog.update(ftimeline.now, 'Penance', damage*2, '#F2FF00')
         fmob_hp -= damage*2
         print(f'Mob HP: {fmob_hp}.')
     else:
         print(f'Penance hit for {damage} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'Penance', damage)
+        flog.update(ftimeline.now, 'Penance', damage, '#F2FF00')
         fmob_hp -= damage
         print(f'Mob HP: {fmob_hp}.')
     if fpenance.hit_count == 1:
@@ -225,12 +229,12 @@ def solace_attack(fmob_hp, ftimeline, flog):
     damage = int(solace.spell_damage*(1+versatility_percent)*(1+schism_buff*0.4))
     if crit_boolean:
         print(f'Solace crit for {damage*2} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'Solace', damage*2)
+        flog.update(ftimeline.now, 'Solace', damage*2, '#3A3F89')
         fmob_hp -= damage*2
         print(f'Mob HP: {fmob_hp}.')
     else:
         print(f'Solace hit for {damage} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'Solace', damage)
+        flog.update(ftimeline.now, 'Solace', damage, '#3A3F89')
         fmob_hp -= damage
         print(f'Mob HP: {fmob_hp}.')
     ftimeline.solace_hit = float('inf')
@@ -249,12 +253,12 @@ def divine_star_attack(fmob_hp, ftimeline, fdivine_star, flog):
     damage = int(fdivine_star.hit_damage * (1 + versatility_percent) * (1 + schism_buff * 0.4))
     if crit_boolean:
         print(f'Divine Star crit for {damage * 2} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'Divine Star', damage*2)
+        flog.update(ftimeline.now, 'Divine Star', damage*2, '#B59C66')
         fmob_hp -= damage * 2
         print(f'Mob HP: {fmob_hp}.')
     else:
         print(f'Divine Star hit for {damage} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'Divine Star', damage)
+        flog.update(ftimeline.now, 'Divine Star', damage, '#B59C66')
         fmob_hp -= damage
         print(f'Mob HP: {fmob_hp}.')
     if fdivine_star.hit_count == 1:
@@ -281,12 +285,12 @@ def smite_attack(fmob_hp, ftimeline, flog):
     damage = int(smite.spell_damage*(1+versatility_percent)*(1+schism_buff*0.4))
     if crit_boolean:
         print(f'Smite crit for {damage*2} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'Smite', damage*2)
+        flog.update(ftimeline.now, 'Smite', damage*2, '#F4F3E9')
         fmob_hp -= damage*2
         print(f'Mob HP: {fmob_hp}.')
     else:
         print(f'Smite hit for {damage} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'Smite', damage)
+        flog.update(ftimeline.now, 'Smite', damage, '#F4F3E9')
         fmob_hp -= damage
         print(f'Mob HP: {fmob_hp}.')
     ftimeline.smite_hit = float('inf')
@@ -380,9 +384,8 @@ timeline = Timeline()
 log = Log()
 mob_number = 1
 
-mob_min_hp = 1000000
-mob_max_hp = 1000000
-
+mob_min_hp = 300000
+mob_max_hp = 300000
 
 print(f'Haste: {haste_percent:.2%}')
 print(f'Crit: {crit_chance:.2%}')
@@ -391,4 +394,25 @@ print(f'Versatility: {versatility_percent:.2%}\n')
 
 timeline, mob_number, pain_dot, penance, divine_star, log = kill_one(timeline, mob_number, pain_dot, penance,
                                                                      divine_star, log)
-print(log.damage_list)
+print(f'There were {len(log.damage_list)} attacks.')
+
+app = dash.Dash(__name__)
+
+# This is the really low level way of doing it, but I don't know how to add a second trace in this way and I need to add
+# multiple traces for a legend because I want to legend to show which spell is which bar color.
+fig_dict = {'data': [{'type': 'bar',
+                      'x': log.time_list,
+                      'y': log.damage_list,
+                      'width': .3,
+                      'marker': {'line': {'width': 1}, 'color': log.color_list}}],
+            'layout': {'showlegend': True}}
+
+fig = go.Figure(fig_dict)
+# At this point, you can fig.add_trace or something of the like.
+
+app.layout = html.Div(children=[html.H1(children='Hello!'),
+                                dcc.Graph(id='example-graph',
+                                          figure=fig)])
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
