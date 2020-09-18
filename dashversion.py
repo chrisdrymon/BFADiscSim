@@ -1,7 +1,5 @@
 import random
 from flask import Blueprint
-import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 import dash
 import dash_core_components as dcc
@@ -97,6 +95,16 @@ class Timeline:
     solace_off_cd = 0
     divine_star_hit = float('inf')
     divine_star_off_cd = 0
+
+
+def figure_maker(fig_name, log_name, bar_color):
+    """Creates plotly figure dictionaries"""
+    return {'type': 'bar',
+            'name': fig_name,
+            'x': log_name.time_list,
+            'y': log_name.damage_list,
+            'width': .4,
+            'marker': {'line': {'width': 1}, 'color': bar_color}}
 
 
 def schism_attack(fmob_hp, ftimeline, flog):
@@ -394,8 +402,8 @@ timeline = Timeline()
 logs = Logs()
 mob_number = 1
 
-mob_min_hp = 300000
-mob_max_hp = 300000
+mob_min_hp = 500000
+mob_max_hp = 500000
 
 print(f'Haste: {haste_percent:.2%}')
 print(f'Crit: {crit_chance:.2%}')
@@ -408,52 +416,23 @@ print(f'There were {len(logs.schism_log.damage_list)} attacks.')
 
 app = dash.Dash(__name__)
 
-schism_fig = {'data': [{'type': 'bar',
-                        'name': 'Schism',
-                        'x': logs.schism_log.time_list,
-                        'y': logs.schism_log.damage_list,
-                        'width': .4,
-                        'marker': {'line': {'width': 1}, 'color': '#2F2F2F'}},
-                       {'type': 'bar',
-                        'name': 'Solace',
-                        'x': logs.solace_log.time_list,
-                        'y': logs.solace_log.damage_list,
-                        'width': .4,
-                        'marker': {'line': {'width': 1}, 'color': 'orange'}},
-                       {'type': 'bar',
-                        'name': 'Smite',
-                        'x': logs.smite_log.time_list,
-                        'y': logs.smite_log.damage_list,
-                        'width': .4,
-                        'marker': {'line': {'width': 1}, 'color': '#589B9B'}
-                        },
-                       {'type': 'bar',
-                        'name': 'Penance',
-                        'x': logs.penance_log.time_list,
-                        'y': logs.penance_log.damage_list,
-                        'width': .4,
-                        'marker': {'line': {'width': 1}, 'color': 'yellow'}
-                        },
-                       {'type': 'bar',
-                        'name': 'Divine Star',
-                        'x': logs.divine_star_log.time_list,
-                        'y': logs.divine_star_log.damage_list,
-                        'width': .4,
-                        'marker': {'line': {'width': 1}, 'color': 'white'}
-                        },
-                       {'type': 'bar',
-                        'name': 'SW: Pain',
-                        'x': logs.pain_log.time_list,
-                        'y': logs.pain_log.damage_list,
-                        'width': .4,
-                        'marker': {'line': {'width': 1}, 'color': '#797a7e'}}],
-              'layout': {'showlegend': True, 'paper_bgcolor': '#29354D', 'plot_bgcolor': '#D8E7EF',
-                         'legend': {'font': {'color': '#D8E7EF'}}}}
+collective_fig = {'data': [figure_maker('Schism', logs.schism_log, '#2F2F2F'),
+                           figure_maker('Solace', logs.solace_log, 'orange'),
+                           figure_maker('Smite', logs.smite_log, '#589B9B'),
+                           figure_maker('Penance', logs.penance_log, 'yellow'),
+                           figure_maker('Divine Star', logs.divine_star_log, 'white'),
+                           figure_maker('SW: Pain', logs.pain_log, '#797a7e')],
+                  'layout': {'showlegend': True, 'paper_bgcolor': '#3d3d3d', 'plot_bgcolor': '#D6CCB4',
+                             'legend': {'font': {'family': 'Special Elite', 'color': '#D8E7EF'}}}}
 
-fig = go.Figure(schism_fig)
-fig.update_layout(barmode='stack', font_color='white')
+fig = go.Figure(collective_fig)
+fig.update_layout(barmode='stack', font_color='#D6CCB4')
+fig.update_traces(marker={'line': {'color': 'black', 'width': 0}})
 
-app.layout = html.Div(children=[html.H1(children='Hello!'),
+app.layout = html.Div(children=[html.H1(className='head',
+                                        children='Disc Priest Damage Simulator'),
+                                html.Div(className='settings',
+                                         children='Intellect'),
                                 dcc.Graph(id='example-graph',
                                           figure=fig)])
 
