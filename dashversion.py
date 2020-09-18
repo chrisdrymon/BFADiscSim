@@ -413,15 +413,13 @@ schism_fig = {'data': [{'type': 'bar',
                         'x': logs.schism_log.time_list,
                         'y': logs.schism_log.damage_list,
                         'width': .3,
-                        'marker': {'line': {'width': 1}, 'color': '#2F2F2F'},
-                        'base': 'stack'},
+                        'marker': {'line': {'width': 1}, 'color': '#2F2F2F'}},
                        {'type': 'bar',
                         'name': 'Solace',
                         'x': logs.solace_log.time_list,
                         'y': logs.solace_log.damage_list,
                         'width': .3,
-                        'marker': {'line': {'width': 1}, 'color': 'orange'}
-                        },
+                        'marker': {'line': {'width': 1}, 'color': 'orange'}},
                        {'type': 'bar',
                         'name': 'Smite',
                         'x': logs.smite_log.time_list,
@@ -448,14 +446,12 @@ schism_fig = {'data': [{'type': 'bar',
                         'x': logs.pain_log.time_list,
                         'y': logs.pain_log.damage_list,
                         'width': .3,
-                        'marker': {'line': {'width': 1}, 'color': '#797a7e'},
-                        'base': 'stack'
-                        }
-                       ],
+                        'marker': {'line': {'width': 1}, 'color': '#797a7e'}}],
               'layout': {'showlegend': True, 'paper_bgcolor': '#29354D', 'plot_bgcolor': '#D8E7EF',
                          'legend': {'font': {'color': '#D8E7EF'}}}}
 
 fig = go.Figure(schism_fig)
+fig.update_layout(barmode='stack', font_color='white')
 
 app.layout = html.Div(children=[html.H1(children='Hello!'),
                                 dcc.Graph(id='example-graph',
