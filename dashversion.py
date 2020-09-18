@@ -56,15 +56,26 @@ class Log:
     """This is for logging data that will be passed to the timeline graph."""
     def __init__(self):
         self.time_list = []
-        self.spell_list = []
         self.damage_list = []
-        self.color_list = []
+        # self.spell_list = []
+        # self.color_list = []
 
-    def update(self, time, spell, damage, color):
+    def update(self, time, damage):
         self.time_list.append(time)
-        self.spell_list.append(spell)
         self.damage_list.append(damage)
-        self.color_list.append(color)
+        # self.spell_list.append(spell)
+        # self.color_list.append(color)
+
+
+class Logs:
+    """A class to hold all the logs."""
+    def __init__(self):
+        self.schism_log = Log()
+        self.pain_log = Log()
+        self.smite_log = Log()
+        self.solace_log = Log()
+        self.penance_log = Log()
+        self.divine_star_log = Log()
 
 
 class Timeline:
@@ -98,12 +109,12 @@ def schism_attack(fmob_hp, ftimeline, flog):
     damage = int(schism.spell_damage*(1+versatility_percent)*(1+schism_buff*0.4))
     if crit_boolean:
         print(f'Schism crit for {damage*2} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'Schism', damage*2, '#26272D')
+        flog.schism_log.update(ftimeline.now, damage*2)
         fmob_hp -= damage*2
         print(f'Mob HP: {fmob_hp}.')
     else:
         print(f'Schism hit for {damage} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'Schism', damage, '#26272D')
+        flog.schism_log.update(ftimeline.now, damage)
         fmob_hp -= damage
         print(f'Mob HP: {fmob_hp}.')
     ftimeline.schism_hit = float('inf')
@@ -123,12 +134,12 @@ def pain_dd_attack(fmob_hp, ftimeline, flog):
     damage = int(pain_dd.spell_damage*(1+versatility_percent)*(1+schism_buff*0.4))
     if crit_boolean:
         print(f'SW: Pain DD crit for {damage*2} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'SW: Pain Initial Hit', damage*2, '#C52D2D')
+        flog.pain_log.update(ftimeline.now, damage*2)
         fmob_hp -= damage*2
         print(f'Mob HP: {fmob_hp}.')
     else:
         print(f'SW: Pain DD hit for {damage} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'SW: Pain Initial Hit', damage, '#C52D2D')
+        flog.pain_log.update(ftimeline.now, damage)
         fmob_hp -= damage
         print(f'Mob HP: {fmob_hp}.')
     ftimeline.pain_dd_hit = float('inf')
@@ -148,12 +159,12 @@ def pain_dot_attack(fmob_hp, ftimeline, fpain_dot, flog):
     damage = int(pain_dd.spell_damage*(1+versatility_percent)*(1+schism_buff*0.4))
     if crit_boolean:
         print(f'SW: Pain DoT crit for {damage*2} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'SW: Pain DoT', damage*2, '#C52D2D')
+        flog.pain_log.update(ftimeline.now, damage*2)
         fmob_hp -= damage*2
         print(f'Mob HP: {fmob_hp}.')
     else:
         print(f'SW: Pain DoT hit for {damage} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'SW: Pain DoT', damage, '#C52D2D')
+        flog.pain_log.update(ftimeline.now, damage)
         fmob_hp -= damage
         print(f'Mob HP: {fmob_hp}.')
     # This sets when the next dot hit will occur.
@@ -176,12 +187,12 @@ def pain_last_dot_attack(fmob_hp, ftimeline, fpain_dot, flog):
     damage = int(pain_dd.spell_damage*(1+versatility_percent)*(1+schism_buff*0.4)*fpain_dot.last_hit_coeff)
     if crit_boolean:
         print(f'SW: Pain DoT crit for {damage*2} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'SW: Pain DoT', damage*2, '#C52D2D')
+        flog.pain_log.update(ftimeline.now, damage*2)
         fmob_hp -= damage*2
         print(f'Mob HP: {fmob_hp}.')
     else:
         print(f'SW: Pain DoT hit for {damage} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'SW: Pain DoT', damage, '#C52D2D')
+        flog.pain_log.update(ftimeline.now, damage)
         fmob_hp -= damage
         print(f'Mob HP: {fmob_hp}.')
     ftimeline.pain_dot_end = 0
@@ -199,12 +210,12 @@ def penance_attack(fmob_hp, ftimeline, fpenance, flog):
     damage = int(fpenance.hit_damage*(1+versatility_percent)*(1+schism_buff*0.4))
     if crit_boolean:
         print(f'Penance crit for {damage*2} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'Penance', damage*2, '#F2FF00')
+        flog.penance_log.update(ftimeline.now, damage*2)
         fmob_hp -= damage*2
         print(f'Mob HP: {fmob_hp}.')
     else:
         print(f'Penance hit for {damage} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'Penance', damage, '#F2FF00')
+        flog.penance_log.update(ftimeline.now, damage)
         fmob_hp -= damage
         print(f'Mob HP: {fmob_hp}.')
     if fpenance.hit_count == 1:
@@ -229,12 +240,12 @@ def solace_attack(fmob_hp, ftimeline, flog):
     damage = int(solace.spell_damage*(1+versatility_percent)*(1+schism_buff*0.4))
     if crit_boolean:
         print(f'Solace crit for {damage*2} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'Solace', damage*2, '#3A3F89')
+        flog.solace_log.update(ftimeline.now, damage*2)
         fmob_hp -= damage*2
         print(f'Mob HP: {fmob_hp}.')
     else:
         print(f'Solace hit for {damage} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'Solace', damage, '#3A3F89')
+        flog.solace_log.update(ftimeline.now, damage)
         fmob_hp -= damage
         print(f'Mob HP: {fmob_hp}.')
     ftimeline.solace_hit = float('inf')
@@ -253,12 +264,12 @@ def divine_star_attack(fmob_hp, ftimeline, fdivine_star, flog):
     damage = int(fdivine_star.hit_damage * (1 + versatility_percent) * (1 + schism_buff * 0.4))
     if crit_boolean:
         print(f'Divine Star crit for {damage * 2} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'Divine Star', damage*2, '#B59C66')
+        flog.divine_star_log.update(ftimeline.now, damage*2)
         fmob_hp -= damage * 2
         print(f'Mob HP: {fmob_hp}.')
     else:
         print(f'Divine Star hit for {damage} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'Divine Star', damage, '#B59C66')
+        flog.divine_star_log.update(ftimeline.now, damage)
         fmob_hp -= damage
         print(f'Mob HP: {fmob_hp}.')
     if fdivine_star.hit_count == 1:
@@ -285,12 +296,12 @@ def smite_attack(fmob_hp, ftimeline, flog):
     damage = int(smite.spell_damage*(1+versatility_percent)*(1+schism_buff*0.4))
     if crit_boolean:
         print(f'Smite crit for {damage*2} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'Smite', damage*2, '#F4F3E9')
+        flog.smite_log.update(ftimeline.now, damage*2)
         fmob_hp -= damage*2
         print(f'Mob HP: {fmob_hp}.')
     else:
         print(f'Smite hit for {damage} at {ftimeline.now:.2f}s.')
-        flog.update(ftimeline.now, 'Smite', damage, '#F4F3E9')
+        flog.smite_log.update(ftimeline.now, damage)
         fmob_hp -= damage
         print(f'Mob HP: {fmob_hp}.')
     ftimeline.smite_hit = float('inf')
@@ -300,7 +311,6 @@ def smite_attack(fmob_hp, ftimeline, flog):
 
 def next_time_stop():
     """Determines next value for timeline.now"""
-    # Values that default to zero can't be included in the list or they'll be the min value every time.
     events_list = [timeline.schism_hit, timeline.pain_dd_hit, timeline.gcd_end, timeline.smite_hit,
                    timeline.pain_dot_hit, timeline.pain_dot_last_hit, timeline.penance_hit, timeline.solace_hit,
                    timeline.divine_star_hit]
@@ -381,7 +391,7 @@ penance = Channeled(1.2, 0.726, 3, 2, 9)
 divine_star = Star(0.8, 0, 15)
 
 timeline = Timeline()
-log = Log()
+logs = Logs()
 mob_number = 1
 
 mob_min_hp = 300000
@@ -392,23 +402,60 @@ print(f'Crit: {crit_chance:.2%}')
 print(f'Mastery: {mastery_percent:.2%}')
 print(f'Versatility: {versatility_percent:.2%}\n')
 
-timeline, mob_number, pain_dot, penance, divine_star, log = kill_one(timeline, mob_number, pain_dot, penance,
-                                                                     divine_star, log)
-print(f'There were {len(log.damage_list)} attacks.')
+timeline, mob_number, pain_dot, penance, divine_star, logs = kill_one(timeline, mob_number, pain_dot, penance,
+                                                                      divine_star, logs)
+print(f'There were {len(logs.schism_log.damage_list)} attacks.')
 
 app = dash.Dash(__name__)
 
-# This is the really low level way of doing it, but I don't know how to add a second trace in this way and I need to add
-# multiple traces for a legend because I want to legend to show which spell is which bar color.
-fig_dict = {'data': [{'type': 'bar',
-                      'x': log.time_list,
-                      'y': log.damage_list,
-                      'width': .3,
-                      'marker': {'line': {'width': 1}, 'color': log.color_list}}],
-            'layout': {'showlegend': True}}
+schism_fig = {'data': [{'type': 'bar',
+                        'name': 'Schism',
+                        'x': logs.schism_log.time_list,
+                        'y': logs.schism_log.damage_list,
+                        'width': .3,
+                        'marker': {'line': {'width': 1}, 'color': '#2F2F2F'},
+                        'base': 'stack'},
+                       {'type': 'bar',
+                        'name': 'Solace',
+                        'x': logs.solace_log.time_list,
+                        'y': logs.solace_log.damage_list,
+                        'width': .3,
+                        'marker': {'line': {'width': 1}, 'color': 'orange'}
+                        },
+                       {'type': 'bar',
+                        'name': 'Smite',
+                        'x': logs.smite_log.time_list,
+                        'y': logs.smite_log.damage_list,
+                        'width': .3,
+                        'marker': {'line': {'width': 1}, 'color': '#589B9B'}
+                        },
+                       {'type': 'bar',
+                        'name': 'Penance',
+                        'x': logs.penance_log.time_list,
+                        'y': logs.penance_log.damage_list,
+                        'width': .3,
+                        'marker': {'line': {'width': 1}, 'color': 'yellow'}
+                        },
+                       {'type': 'bar',
+                        'name': 'Divine Star',
+                        'x': logs.divine_star_log.time_list,
+                        'y': logs.divine_star_log.damage_list,
+                        'width': .3,
+                        'marker': {'line': {'width': 1}, 'color': 'white'}
+                        },
+                       {'type': 'bar',
+                        'name': 'SW: Pain',
+                        'x': logs.pain_log.time_list,
+                        'y': logs.pain_log.damage_list,
+                        'width': .3,
+                        'marker': {'line': {'width': 1}, 'color': '#797a7e'},
+                        'base': 'stack'
+                        }
+                       ],
+              'layout': {'showlegend': True, 'paper_bgcolor': '#29354D', 'plot_bgcolor': '#D8E7EF',
+                         'legend': {'font': {'color': '#D8E7EF'}}}}
 
-fig = go.Figure(fig_dict)
-# At this point, you can fig.add_trace or something of the like.
+fig = go.Figure(schism_fig)
 
 app.layout = html.Div(children=[html.H1(children='Hello!'),
                                 dcc.Graph(id='example-graph',
