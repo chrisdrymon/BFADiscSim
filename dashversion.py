@@ -412,7 +412,6 @@ print(f'Versatility: {versatility_percent:.2%}\n')
 
 timeline, mob_number, pain_dot, penance, divine_star, logs = kill_one(timeline, mob_number, pain_dot, penance,
                                                                       divine_star, logs)
-print(f'There were {len(logs.schism_log.damage_list)} attacks.')
 
 app = dash.Dash(__name__)
 
@@ -423,18 +422,62 @@ collective_fig = {'data': [figure_maker('Schism', logs.schism_log, '#2F2F2F'),
                            figure_maker('Divine Star', logs.divine_star_log, 'white'),
                            figure_maker('SW: Pain', logs.pain_log, '#797a7e')],
                   'layout': {'showlegend': True, 'paper_bgcolor': '#3d3d3d', 'plot_bgcolor': '#D6CCB4',
-                             'legend': {'font': {'family': 'Special Elite', 'color': '#D8E7EF'}}}}
+                             'legend': {'font': {'family': 'Shadows Into Light', 'color': '#D8E7EF', 'size': 24}}}}
 
 fig = go.Figure(collective_fig)
-fig.update_layout(barmode='stack', font_color='#D6CCB4')
+fig.update_layout(barmode='stack', font_color='#D6CCB4', xaxis={'title': {'text': 'Time (seconds)'}},
+                  yaxis={'title': {'text': 'Damage'}}, title={'text': 'Timeline of Spell Hits', 'xref': 'container',
+                                                              'x': 0.5, 'font': {'family': 'Shadows Into Light',
+                                                                                 'size': 34}})
 fig.update_traces(marker={'line': {'color': 'black', 'width': 0}})
 
 app.layout = html.Div(children=[html.H1(className='head',
                                         children='Disc Priest Damage Simulator'),
                                 html.Div(className='settings',
-                                         children='Intellect'),
-                                dcc.Graph(id='example-graph',
-                                          figure=fig)])
+                                         id='settings',
+                                         children=['Intellect: ', dcc.Input(className='inputs', id='intellect',
+                                                                            value=7000, type='number', debounce=True),
+                                                   ' Crit Rating: ', dcc.Input(className='inputs', id='crit',
+                                                                               value=1000,
+                                                                               type='number', debounce=True),
+                                                   ' Haste Rating: ', dcc.Input(className='inputs', id='haste',
+                                                                                value=1000, type='number',
+                                                                                debounce=True),
+                                                   ' Mastery Rating: ', dcc.Input(className='inputs', id='mastery',
+                                                                                  value=1000, type='number',
+                                                                                  debounce=True),
+                                                   ' Versatility Rating: ', dcc.Input(className='inputs',
+                                                                                      id='versatility', value=500,
+                                                                                      type='number', debounce=True)]),
+                                html.Div(className='results', children=[f'Time to do 500k damage: {timeline.now:.02f}',
+                                                                        html.Br(),
+                                                                        f'Average DPS: {500000/timeline.now:,.02f}']),
+                                dcc.Graph(id='example-graph', figure=fig)])
+
+
+# @app.callback(
+#     Output(component_id='example-graph', component_property='figure'),
+#     [Input(component_id='intellect', component_property='value')]
+# )
+# def update_graph(input_value):
+#     intellect = input_value
+#     schism = Spells(1.29, 7.77, 1.5, 24)
+#     pain_dd = Spells(0.165, 0.858, 0, 0)
+#     smite = Spells(0.57, 3.26, 1.5, 0)
+#     solace = Spells(0.829, 5.11, 0, 12)
+#     pain_dot = Dots(0.992, 1.31, 16, 2, 0, 0)
+#     penance = Channeled(1.2, 0.726, 3, 2, 9)
+#     divine_star = Star(0.8, 0, 15)
+#     collective_fig = {'data': [figure_maker('Schism', logs.schism_log, '#2F2F2F'),
+#                                figure_maker('Solace', logs.solace_log, 'orange'),
+#                                figure_maker('Smite', logs.smite_log, '#589B9B'),
+#                                figure_maker('Penance', logs.penance_log, 'yellow'),
+#                                figure_maker('Divine Star', logs.divine_star_log, 'white'),
+#                                figure_maker('SW: Pain', logs.pain_log, '#797a7e')],
+#                       'layout': {'showlegend': True, 'paper_bgcolor': '#3d3d3d', 'plot_bgcolor': '#D6CCB4',
+#                                  'legend': {'font': {'family': 'Shadows Into Light', 'color': '#D8E7EF', 'size': 24}}}}
+#
+#     fig = go.Figure(collective_fig)
 
 if __name__ == '__main__':
     app.run_server(debug=True)

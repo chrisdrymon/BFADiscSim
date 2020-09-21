@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@100&family=Shadows+Into+Light&family=Long+Cang&family=Special+Elite&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@100&family=Shadows+Into+Light&family=Long+Cang&display=swap');
 
 /* Zero out some problems */
 html, body, div, span, applet, object, iframe,
@@ -28,8 +28,9 @@ footer, header, hgroup, menu, nav, section {
 }
 
 body {
-    font-family: 'Special Elite';
+    font-family: 'Shadows Into Light';
     }
+
 h1 {
     font-size: 3.5em;
     color: #dbceb3;
@@ -37,8 +38,16 @@ h1 {
 .head{
     background-color: #1d1d1d;
     text-align: center;
-    padding-top: .2em;
 }
 .settings{
     background-color: #73817d;
+    font-size: 1.5em;
+    text-align: center;
+}
+.inputs{
+    width: 55px;
+}
+.results{
+    font-size: 2.5em;
+    text-align: center;
 }
