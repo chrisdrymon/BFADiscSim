@@ -14,89 +14,6 @@ semdoms_bp = Blueprint('semdoms_bp', __name__,
                        static_url_path='/discsim/static')
 
 
-class Spells:
-    """Creates stats for direct damage spells"""
-    def __init__(self, sp_weight, sp_bias, cast_time, cooldown):
-        self.spell_damage = sp_weight*intellect + sp_bias
-        self.cast_time = cast_time/(1+haste_percent)
-        self.cooldown = cooldown
-
-
-class Dots:
-    """Creates stats for damage-over-time spells"""
-    def __init__(self, sp_weight, sp_bias, dot_duration, hit_interval, cast_time, cooldown):
-        self.dot_hit_damage = (sp_weight*intellect + sp_bias)/(dot_duration/hit_interval)
-        self.dot_hit_interval = hit_interval / (1+haste_percent)
-        self.dot_duration = dot_duration
-        self.cast_time = cast_time/(1+haste_percent)
-        self.cooldown = cooldown
-        self.last_hit_coeff = 0
-
-
-class Channeled:
-    """Creates stats for channeled spells"""
-    def __init__(self, sp_weight, sp_bias, hits, channel_duration, cooldown):
-        self.hit_damage = (sp_weight*intellect + sp_bias)/hits
-        self.hit_interval = (channel_duration / (1+haste_percent))/hits
-        self.cooldown = cooldown
-        self.hit_count = 1
-
-
-class Star:
-    """Creates stats for Divine Star"""
-    def __init__(self, sp_weight, sp_bias, cooldown):
-        self.hit_damage = (sp_weight*intellect + sp_bias)/2
-        self.cooldown = cooldown
-        self.hit_count = 1
-
-
-class Log:
-    """This is for logging data that will be passed to the timeline graph."""
-    def __init__(self):
-        self.time_list = []
-        self.damage_list = []
-        # self.spell_list = []
-        # self.color_list = []
-
-    def update(self, time, damage):
-        self.time_list.append(time)
-        self.damage_list.append(damage)
-        # self.spell_list.append(spell)
-        # self.color_list.append(color)
-
-
-class Logs:
-    """A class to hold all the logs."""
-    def __init__(self):
-        self.schism_log = Log()
-        self.pain_log = Log()
-        self.smite_log = Log()
-        self.solace_log = Log()
-        self.penance_log = Log()
-        self.divine_star_log = Log()
-
-
-class Timeline:
-    """A timeline class which will keep track of the possible events that can occur"""
-    now = 0
-    gcd_end = float('inf')
-    schism_hit = float('inf')
-    schism_off_cd = 0
-    # Schism Debuff increases damage taken by 40% for 9 seconds.
-    schism_debuff_end = 0
-    pain_dd_hit = float('inf')
-    pain_dot_hit = float('inf')
-    pain_dot_end = 0
-    pain_dot_last_hit = float('inf')
-    smite_hit = float('inf')
-    penance_hit = float('inf')
-    penance_off_cd = 0
-    solace_hit = float('inf')
-    solace_off_cd = 0
-    divine_star_hit = float('inf')
-    divine_star_off_cd = 0
-
-
 def figure_maker(fig_name, log_name, bar_color):
     """Creates plotly figure dictionaries"""
     return {'type': 'bar',
@@ -367,7 +284,7 @@ def execute_time_stop(fmob_hp, ftimeline, fpain_dot, fpenance, fdivine_star, flo
 
 
 def kill_one(ftimeline, fmob_num, fpain_dot, fpenance, fdivine_star, flog):
-    mob_hp = int(random.randrange(mob_min_hp, mob_max_hp+1))
+    mob_hp = 500000
     print(f'Mob {fmob_num} HP: {mob_hp}.')
     ftimeline = next_spell(ftimeline)
     while mob_hp > 0:
@@ -378,7 +295,7 @@ def kill_one(ftimeline, fmob_num, fpain_dot, fpenance, fdivine_star, flog):
     return ftimeline, fmob_num, fpain_dot, fpenance, fdivine_star, flog
 
 
-intellect = 7189
+#intellect = 7189
 crit_rating = 1273
 haste_rating = 473
 mastery_rating = 716
@@ -389,40 +306,40 @@ haste_percent = haste_rating*0.0696/473
 mastery_percent = mastery_rating*0.1343/716
 versatility_percent = versatility_rating*0.0389/331
 
-global_cd = Spells(0, 0, 1.5, 0)
-schism = Spells(1.29, 7.77, 1.5, 24)
-pain_dd = Spells(0.165, 0.858, 0, 0)
-smite = Spells(0.57, 3.26, 1.5, 0)
-solace = Spells(0.829, 5.11, 0, 12)
-pain_dot = Dots(0.992, 1.31, 16, 2, 0, 0)
-penance = Channeled(1.2, 0.726, 3, 2, 9)
-divine_star = Star(0.8, 0, 15)
+# global_cd = Spells(0, 0, 1.5, 0)
+# schism = Spells(1.29, 7.77, 1.5, 24)
+# pain_dd = Spells(0.165, 0.858, 0, 0)
+# smite = Spells(0.57, 3.26, 1.5, 0)
+# solace = Spells(0.829, 5.11, 0, 12)
+# pain_dot = Dots(0.992, 1.31, 16, 2, 0, 0)
+# penance = Channeled(1.2, 0.726, 3, 2, 9)
+# divine_star = Star(0.8, 0, 15)
 
-timeline = Timeline()
-logs = Logs()
-mob_number = 1
+# timeline = Timeline()
+# logs = Logs()
+# mob_number = 1
+#
+# mob_min_hp = 500000
+# mob_max_hp = 500000
 
-mob_min_hp = 500000
-mob_max_hp = 500000
+# print(f'Haste: {haste_percent:.2%}')
+# print(f'Crit: {crit_chance:.2%}')
+# print(f'Mastery: {mastery_percent:.2%}')
+# print(f'Versatility: {versatility_percent:.2%}\n')
 
-print(f'Haste: {haste_percent:.2%}')
-print(f'Crit: {crit_chance:.2%}')
-print(f'Mastery: {mastery_percent:.2%}')
-print(f'Versatility: {versatility_percent:.2%}\n')
-
-timeline, mob_number, pain_dot, penance, divine_star, logs = kill_one(timeline, mob_number, pain_dot, penance,
-                                                                      divine_star, logs)
+# timeline, mob_number, pain_dot, penance, divine_star, logs = kill_one(timeline, mob_number, pain_dot, penance,
+#                                                                       divine_star, logs)
 
 app = dash.Dash(__name__)
 
-collective_fig = {'data': [figure_maker('Schism', logs.schism_log, '#2F2F2F'),
-                           figure_maker('Solace', logs.solace_log, 'orange'),
-                           figure_maker('Smite', logs.smite_log, '#589B9B'),
-                           figure_maker('Penance', logs.penance_log, 'yellow'),
-                           figure_maker('Divine Star', logs.divine_star_log, 'white'),
-                           figure_maker('SW: Pain', logs.pain_log, '#797a7e')],
-                  'layout': {'showlegend': True, 'paper_bgcolor': '#3d3d3d', 'plot_bgcolor': '#D6CCB4',
-                             'legend': {'font': {'family': 'Shadows Into Light', 'color': '#D8E7EF', 'size': 24}}}}
+# collective_fig = {'data': [figure_maker('Schism', logs.schism_log, '#2F2F2F'),
+#                            figure_maker('Solace', logs.solace_log, 'orange'),
+#                            figure_maker('Smite', logs.smite_log, '#589B9B'),
+#                            figure_maker('Penance', logs.penance_log, 'yellow'),
+#                            figure_maker('Divine Star', logs.divine_star_log, 'white'),
+#                            figure_maker('SW: Pain', logs.pain_log, '#797a7e')],
+#                   'layout': {'showlegend': True, 'paper_bgcolor': '#3d3d3d', 'plot_bgcolor': '#D6CCB4',
+#                              'legend': {'font': {'family': 'Shadows Into Light', 'color': '#D8E7EF', 'size': 24}}}}
 
 fig = go.Figure(collective_fig)
 fig.update_layout(barmode='stack', font_color='#D6CCB4', xaxis={'title': {'text': 'Time (seconds)'}},
@@ -455,29 +372,118 @@ app.layout = html.Div(children=[html.H1(className='head',
                                 dcc.Graph(id='example-graph', figure=fig)])
 
 
-# @app.callback(
-#     Output(component_id='example-graph', component_property='figure'),
-#     [Input(component_id='intellect', component_property='value')]
-# )
-# def update_graph(input_value):
-#     intellect = input_value
-#     schism = Spells(1.29, 7.77, 1.5, 24)
-#     pain_dd = Spells(0.165, 0.858, 0, 0)
-#     smite = Spells(0.57, 3.26, 1.5, 0)
-#     solace = Spells(0.829, 5.11, 0, 12)
-#     pain_dot = Dots(0.992, 1.31, 16, 2, 0, 0)
-#     penance = Channeled(1.2, 0.726, 3, 2, 9)
-#     divine_star = Star(0.8, 0, 15)
-#     collective_fig = {'data': [figure_maker('Schism', logs.schism_log, '#2F2F2F'),
-#                                figure_maker('Solace', logs.solace_log, 'orange'),
-#                                figure_maker('Smite', logs.smite_log, '#589B9B'),
-#                                figure_maker('Penance', logs.penance_log, 'yellow'),
-#                                figure_maker('Divine Star', logs.divine_star_log, 'white'),
-#                                figure_maker('SW: Pain', logs.pain_log, '#797a7e')],
-#                       'layout': {'showlegend': True, 'paper_bgcolor': '#3d3d3d', 'plot_bgcolor': '#D6CCB4',
-#                                  'legend': {'font': {'family': 'Shadows Into Light', 'color': '#D8E7EF', 'size': 24}}}}
+@app.callback(
+    Output(component_id='example-graph', component_property='figure'),
+    [Input(component_id='intellect', component_property='value')]
+)
+def update_graph(input_value):
+    class Spells:
+        """Creates stats for direct damage spells"""
+
+        def __init__(self, sp_weight, sp_bias, cast_time, cooldown):
+            self.spell_damage = sp_weight * intellect + sp_bias
+            self.cast_time = cast_time / (1 + haste_percent)
+            self.cooldown = cooldown
+
+    class Dots:
+        """Creates stats for damage-over-time spells"""
+
+        def __init__(self, sp_weight, sp_bias, dot_duration, hit_interval, cast_time, cooldown):
+            self.dot_hit_damage = (sp_weight * intellect + sp_bias) / (dot_duration / hit_interval)
+            self.dot_hit_interval = hit_interval / (1 + haste_percent)
+            self.dot_duration = dot_duration
+            self.cast_time = cast_time / (1 + haste_percent)
+            self.cooldown = cooldown
+            self.last_hit_coeff = 0
+
+    class Channeled:
+        """Creates stats for channeled spells"""
+
+        def __init__(self, sp_weight, sp_bias, hits, channel_duration, cooldown):
+            self.hit_damage = (sp_weight * intellect + sp_bias) / hits
+            self.hit_interval = (channel_duration / (1 + haste_percent)) / hits
+            self.cooldown = cooldown
+            self.hit_count = 1
+
+    class Star:
+        """Creates stats for Divine Star"""
+
+        def __init__(self, sp_weight, sp_bias, cooldown):
+            self.hit_damage = (sp_weight * intellect + sp_bias) / 2
+            self.cooldown = cooldown
+            self.hit_count = 1
+
+    class Log:
+        """This is for logging data that will be passed to the timeline graph."""
+
+        def __init__(self):
+            self.time_list = []
+            self.damage_list = []
+            # self.spell_list = []
+            # self.color_list = []
+
+        def update(self, time, damage):
+            self.time_list.append(time)
+            self.damage_list.append(damage)
+            # self.spell_list.append(spell)
+            # self.color_list.append(color)
+
+    class Logs:
+        """A class to hold all the logs."""
+
+        def __init__(self):
+            self.schism_log = Log()
+            self.pain_log = Log()
+            self.smite_log = Log()
+            self.solace_log = Log()
+            self.penance_log = Log()
+            self.divine_star_log = Log()
+
+    class Timeline:
+        """A timeline class which will keep track of the possible events that can occur"""
+        now = 0
+        gcd_end = float('inf')
+        schism_hit = float('inf')
+        schism_off_cd = 0
+        # Schism Debuff increases damage taken by 40% for 9 seconds.
+        schism_debuff_end = 0
+        pain_dd_hit = float('inf')
+        pain_dot_hit = float('inf')
+        pain_dot_end = 0
+        pain_dot_last_hit = float('inf')
+        smite_hit = float('inf')
+        penance_hit = float('inf')
+        penance_off_cd = 0
+        solace_hit = float('inf')
+        solace_off_cd = 0
+        divine_star_hit = float('inf')
+        divine_star_off_cd = 0
+
+    intellect = input_value
+    schism = Spells(1.29, 7.77, 1.5, 24)
+    pain_dd = Spells(0.165, 0.858, 0, 0)
+    smite = Spells(0.57, 3.26, 1.5, 0)
+    solace = Spells(0.829, 5.11, 0, 12)
+    pain_dot = Dots(0.992, 1.31, 16, 2, 0, 0)
+    penance = Channeled(1.2, 0.726, 3, 2, 9)
+    divine_star = Star(0.8, 0, 15)
+    timeline = Timeline()
+    logs = Logs()
+    mob_number = 1
+
+    mob_min_hp = 500000
+    mob_max_hp = 500000
+    collective_fig = {'data': [figure_maker('Schism', logs.schism_log, '#2F2F2F'),
+                               figure_maker('Solace', logs.solace_log, 'orange'),
+                               figure_maker('Smite', logs.smite_log, '#589B9B'),
+                               figure_maker('Penance', logs.penance_log, 'yellow'),
+                               figure_maker('Divine Star', logs.divine_star_log, 'white'),
+                               figure_maker('SW: Pain', logs.pain_log, '#797a7e')],
+                      'layout': {'showlegend': True, 'paper_bgcolor': '#3d3d3d', 'plot_bgcolor': '#D6CCB4',
+                                 'legend': {'font': {'family': 'Shadows Into Light', 'color': '#D8E7EF', 'size': 24}}}}
 #
 #     fig = go.Figure(collective_fig)
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
