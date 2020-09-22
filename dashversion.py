@@ -384,14 +384,22 @@ def make_dash(intellect, crit_rating, haste_rating, mastery_rating, versatility_
 
     timeline, mob_number, pain_dot, penance, divine_star, logs = kill_one(timeline, mob_number, pain_dot, penance,
                                                                           divine_star, logs)
-    return {'data': [figure_maker('Schism', logs.schism_log, '#2F2F2F'),
-                     figure_maker('Solace', logs.solace_log, 'orange'),
-                     figure_maker('Smite', logs.smite_log, '#589B9B'),
-                     figure_maker('Penance', logs.penance_log, 'yellow'),
-                     figure_maker('Divine Star', logs.divine_star_log, 'white'),
-                     figure_maker('SW: Pain', logs.pain_log, '#797a7e')],
-            'layout': {'showlegend': True, 'paper_bgcolor': '#3d3d3d', 'plot_bgcolor': '#D6CCB4',
-                       'legend': {'font': {'family': 'Shadows Into Light', 'color': '#D8E7EF', 'size': 24}}}}
+    collective_fig = {'data': [figure_maker('Schism', logs.schism_log, '#2F2F2F'),
+                               figure_maker('Solace', logs.solace_log, 'orange'),
+                               figure_maker('Smite', logs.smite_log, '#589B9B'),
+                               figure_maker('Penance', logs.penance_log, 'yellow'),
+                               figure_maker('Divine Star', logs.divine_star_log, 'white'),
+                               figure_maker('SW: Pain', logs.pain_log, '#797a7e')],
+                      'layout': {'showlegend': True, 'paper_bgcolor': '#3d3d3d', 'plot_bgcolor': '#D6CCB4',
+                                 'legend': {'font': {'family': 'Shadows Into Light', 'color': '#D8E7EF', 'size': 24}}}}
+    fig = go.Figure(collective_fig)
+    fig.update_layout(barmode='stack', font_color='#D6CCB4', xaxis={'title': {'text': 'Time (seconds)'}},
+                      yaxis={'title': {'text': 'Damage'}}, title={'text': 'Timeline of Spell Hits', 'xref': 'container',
+                                                                  'x': 0.5, 'font': {'family': 'Shadows Into Light',
+                                                                                     'size': 34}})
+    fig.update_traces(marker={'line': {'color': 'black', 'width': 0}})
+
+    return fig
 
 
 initial_layout = make_dash(7189, 1273, 473, 716, 331)
@@ -401,12 +409,7 @@ initial_layout = make_dash(7189, 1273, 473, 716, 331)
 #
 # collective_fig =
 #
-# fig = go.Figure(collective_fig)
-# fig.update_layout(barmode='stack', font_color='#D6CCB4', xaxis={'title': {'text': 'Time (seconds)'}},
-#                   yaxis={'title': {'text': 'Damage'}}, title={'text': 'Timeline of Spell Hits', 'xref': 'container',
-#                                                               'x': 0.5, 'font': {'family': 'Shadows Into Light',
-#                                                                                  'size': 34}})
-# fig.update_traces(marker={'line': {'color': 'black', 'width': 0}})
+
 #
 # app.layout = html.Div(children=[html.H1(className='head',
 #                                         children='Disc Priest Damage Simulator'),
