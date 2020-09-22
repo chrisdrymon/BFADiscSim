@@ -464,24 +464,25 @@ def initial_layout(intel, crit, haste, mastery, versatility):
                     )
 
 
-app = dash.Dash(__name__)
+@semdoms_bp.route('/wowsim', methods=['GET'])
+def create_sim_dash(server):
+    """Creates the Wow Sim App dashboard and determines its initial layout."""
+    sim_app = dash.Dash(__name__, server=server, routes_pathname_prefix='/wowsim/')
+    sim_app.layout = initial_layout(7000, 1000, 1000, 500, 500)
 
-app.layout = initial_layout(7000, 1000, 1000, 500, 500)
-
-
-@app.callback(
-    [Output(component_id='example-graph', component_property='figure'),
-     Output(component_id='results', component_property='children')],
-    [Input(component_id='intellect', component_property='value'),
-     Input(component_id='crit', component_property='value'),
-     Input(component_id='haste', component_property='value'),
-     Input(component_id='mastery', component_property='value'),
-     Input(component_id='versatility', component_property='value')]
-)
-def update_dash(intel, crit, haste, mastery, versatility):
-    fig, now = make_dash(intel, crit, haste, mastery, versatility)
-    return fig, now
+    init_callbacks(sim_app)
 
 
-if __name__ == '__main__':
-    app.run_server(debug=True)
+def init_callbacks(sim_app):
+    @sim_app.callback(
+        [Output(component_id='example-graph', component_property='figure'),
+         Output(component_id='results', component_property='children')],
+        [Input(component_id='intellect', component_property='value'),
+         Input(component_id='crit', component_property='value'),
+         Input(component_id='haste', component_property='value'),
+         Input(component_id='mastery', component_property='value'),
+         Input(component_id='versatility', component_property='value')]
+    )
+    def update_dash(intel, crit, haste, mastery, versatility):
+        fig, now = make_dash(intel, crit, haste, mastery, versatility)
+        return fig, now
