@@ -34,20 +34,33 @@ body {
 h1 {
     font-size: 3.5em;
     color: #dbceb3;
+    text-align: center;
 }
 .head{
     background-color: #1d1d1d;
     text-align: center;
 }
 .settings{
-    background-color: #73817d;
+    background-color: #3d3d3d;
+    color: #dbceb3;
     font-size: 1.5em;
     text-align: center;
 }
 .inputs{
-    width: 55px;
+    width: 75px;
+    vertical-align: middle;
+    font-size: .7em;
 }
 .results{
     font-size: 2.5em;
     text-align: center;
+    background-color: #837E79;
+    color: #dbceb3;
 }
+.time_taken{
+    color: #EDBE4A;
+}
+.about{
+    background-color: #837E79;
+    font-size: 1.4em;
+}}

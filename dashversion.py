@@ -25,7 +25,7 @@ def figure_maker(fig_name, log_name, bar_color):
 
 
 def make_dash(intellect, crit_rating, haste_rating, mastery_rating, versatility_rating):
-    """Creates a new simulation timeline and figure from the given stats."""
+    """Creates a new simulation timeline, figure, and DPS from the given stats."""
     class Spells:
         """Creates stats for direct damage spells"""
 
@@ -113,15 +113,15 @@ def make_dash(intellect, crit_rating, haste_rating, mastery_rating, versatility_
             schism_buff = False
         damage = int(schism.spell_damage * (1 + versatility_percent) * (1 + schism_buff * 0.4))
         if crit_boolean:
-            print(f'Schism crit for {damage * 2} at {ftimeline.now:.2f}s.')
+            # print(f'Schism crit for {damage * 2} at {ftimeline.now:.2f}s.')
             flog.schism_log.update(ftimeline.now, damage * 2)
             fmob_hp -= damage * 2
-            print(f'Mob HP: {fmob_hp}.')
+            # print(f'Mob HP: {fmob_hp}.')
         else:
-            print(f'Schism hit for {damage} at {ftimeline.now:.2f}s.')
+            # print(f'Schism hit for {damage} at {ftimeline.now:.2f}s.')
             flog.schism_log.update(ftimeline.now, damage)
             fmob_hp -= damage
-            print(f'Mob HP: {fmob_hp}.')
+            # print(f'Mob HP: {fmob_hp}.')
         ftimeline.schism_hit = float('inf')
         ftimeline.schism_off_cd = ftimeline.now + schism.cooldown
         ftimeline.schism_debuff_end = ftimeline.now + 9
@@ -137,15 +137,15 @@ def make_dash(intellect, crit_rating, haste_rating, mastery_rating, versatility_
             schism_buff = False
         damage = int(pain_dd.spell_damage * (1 + versatility_percent) * (1 + schism_buff * 0.4))
         if crit_boolean:
-            print(f'SW: Pain DD crit for {damage * 2} at {ftimeline.now:.2f}s.')
+            # print(f'SW: Pain DD crit for {damage * 2} at {ftimeline.now:.2f}s.')
             flog.pain_log.update(ftimeline.now, damage * 2)
             fmob_hp -= damage * 2
-            print(f'Mob HP: {fmob_hp}.')
+            # print(f'Mob HP: {fmob_hp}.')
         else:
-            print(f'SW: Pain DD hit for {damage} at {ftimeline.now:.2f}s.')
+            # print(f'SW: Pain DD hit for {damage} at {ftimeline.now:.2f}s.')
             flog.pain_log.update(ftimeline.now, damage)
             fmob_hp -= damage
-            print(f'Mob HP: {fmob_hp}.')
+            # print(f'Mob HP: {fmob_hp}.')
         ftimeline.pain_dd_hit = float('inf')
         ftimeline.pain_dot_end = ftimeline.now + pain_dot.dot_duration
         ftimeline.pain_dot_hit = ftimeline.now + pain_dot.dot_hit_interval
@@ -161,15 +161,15 @@ def make_dash(intellect, crit_rating, haste_rating, mastery_rating, versatility_
             schism_buff = False
         damage = int(pain_dd.spell_damage * (1 + versatility_percent) * (1 + schism_buff * 0.4))
         if crit_boolean:
-            print(f'SW: Pain DoT crit for {damage * 2} at {ftimeline.now:.2f}s.')
+            # print(f'SW: Pain DoT crit for {damage * 2} at {ftimeline.now:.2f}s.')
             flog.pain_log.update(ftimeline.now, damage * 2)
             fmob_hp -= damage * 2
-            print(f'Mob HP: {fmob_hp}.')
+            # print(f'Mob HP: {fmob_hp}.')
         else:
-            print(f'SW: Pain DoT hit for {damage} at {ftimeline.now:.2f}s.')
+            # print(f'SW: Pain DoT hit for {damage} at {ftimeline.now:.2f}s.')
             flog.pain_log.update(ftimeline.now, damage)
             fmob_hp -= damage
-            print(f'Mob HP: {fmob_hp}.')
+            # print(f'Mob HP: {fmob_hp}.')
         # This sets when the next dot hit will occur.
         if ftimeline.now + fpain_dot.dot_hit_interval <= ftimeline.pain_dot_end:
             ftimeline.pain_dot_hit = ftimeline.now + fpain_dot.dot_hit_interval
@@ -189,15 +189,15 @@ def make_dash(intellect, crit_rating, haste_rating, mastery_rating, versatility_
         damage = int(
             pain_dd.spell_damage * (1 + versatility_percent) * (1 + schism_buff * 0.4) * fpain_dot.last_hit_coeff)
         if crit_boolean:
-            print(f'SW: Pain DoT crit for {damage * 2} at {ftimeline.now:.2f}s.')
+            # print(f'SW: Pain DoT crit for {damage * 2} at {ftimeline.now:.2f}s.')
             flog.pain_log.update(ftimeline.now, damage * 2)
             fmob_hp -= damage * 2
-            print(f'Mob HP: {fmob_hp}.')
+            # print(f'Mob HP: {fmob_hp}.')
         else:
-            print(f'SW: Pain DoT hit for {damage} at {ftimeline.now:.2f}s.')
+            # print(f'SW: Pain DoT hit for {damage} at {ftimeline.now:.2f}s.')
             flog.pain_log.update(ftimeline.now, damage)
             fmob_hp -= damage
-            print(f'Mob HP: {fmob_hp}.')
+            # print(f'Mob HP: {fmob_hp}.')
         ftimeline.pain_dot_end = 0
         ftimeline.pain_dot_last_hit = float('inf')
         return fmob_hp, ftimeline, flog
@@ -211,15 +211,15 @@ def make_dash(intellect, crit_rating, haste_rating, mastery_rating, versatility_
             schism_buff = False
         damage = int(fpenance.hit_damage * (1 + versatility_percent) * (1 + schism_buff * 0.4))
         if crit_boolean:
-            print(f'Penance crit for {damage * 2} at {ftimeline.now:.2f}s.')
+            # print(f'Penance crit for {damage * 2} at {ftimeline.now:.2f}s.')
             flog.penance_log.update(ftimeline.now, damage * 2)
             fmob_hp -= damage * 2
-            print(f'Mob HP: {fmob_hp}.')
+            # print(f'Mob HP: {fmob_hp}.')
         else:
-            print(f'Penance hit for {damage} at {ftimeline.now:.2f}s.')
+            # print(f'Penance hit for {damage} at {ftimeline.now:.2f}s.')
             flog.penance_log.update(ftimeline.now, damage)
             fmob_hp -= damage
-            print(f'Mob HP: {fmob_hp}.')
+            # print(f'Mob HP: {fmob_hp}.')
         if fpenance.hit_count == 1:
             ftimeline.penance_off_cd = ftimeline.now + fpenance.cooldown
         if fpenance.hit_count < 3:
@@ -240,15 +240,15 @@ def make_dash(intellect, crit_rating, haste_rating, mastery_rating, versatility_
             schism_buff = False
         damage = int(solace.spell_damage * (1 + versatility_percent) * (1 + schism_buff * 0.4))
         if crit_boolean:
-            print(f'Solace crit for {damage * 2} at {ftimeline.now:.2f}s.')
+            # print(f'Solace crit for {damage * 2} at {ftimeline.now:.2f}s.')
             flog.solace_log.update(ftimeline.now, damage * 2)
             fmob_hp -= damage * 2
-            print(f'Mob HP: {fmob_hp}.')
+            # print(f'Mob HP: {fmob_hp}.')
         else:
-            print(f'Solace hit for {damage} at {ftimeline.now:.2f}s.')
+            # print(f'Solace hit for {damage} at {ftimeline.now:.2f}s.')
             flog.solace_log.update(ftimeline.now, damage)
             fmob_hp -= damage
-            print(f'Mob HP: {fmob_hp}.')
+            # print(f'Mob HP: {fmob_hp}.')
         ftimeline.solace_hit = float('inf')
         ftimeline.solace_off_cd = ftimeline.now + solace.cooldown
         ftimeline.gcd_end = ftimeline.now + global_cd.cast_time
@@ -263,15 +263,15 @@ def make_dash(intellect, crit_rating, haste_rating, mastery_rating, versatility_
             schism_buff = False
         damage = int(fdivine_star.hit_damage * (1 + versatility_percent) * (1 + schism_buff * 0.4))
         if crit_boolean:
-            print(f'Divine Star crit for {damage * 2} at {ftimeline.now:.2f}s.')
+            # print(f'Divine Star crit for {damage * 2} at {ftimeline.now:.2f}s.')
             flog.divine_star_log.update(ftimeline.now, damage * 2)
             fmob_hp -= damage * 2
-            print(f'Mob HP: {fmob_hp}.')
+            # print(f'Mob HP: {fmob_hp}.')
         else:
-            print(f'Divine Star hit for {damage} at {ftimeline.now:.2f}s.')
+            # print(f'Divine Star hit for {damage} at {ftimeline.now:.2f}s.')
             flog.divine_star_log.update(ftimeline.now, damage)
             fmob_hp -= damage
-            print(f'Mob HP: {fmob_hp}.')
+            # print(f'Mob HP: {fmob_hp}.')
         if fdivine_star.hit_count == 1:
             ftimeline.divine_star_off_cd = ftimeline.now + fdivine_star.cooldown
             ftimeline.gcd_end = ftimeline.now + global_cd.cooldown
@@ -294,15 +294,15 @@ def make_dash(intellect, crit_rating, haste_rating, mastery_rating, versatility_
             schism_buff = False
         damage = int(smite.spell_damage * (1 + versatility_percent) * (1 + schism_buff * 0.4))
         if crit_boolean:
-            print(f'Smite crit for {damage * 2} at {ftimeline.now:.2f}s.')
+            # print(f'Smite crit for {damage * 2} at {ftimeline.now:.2f}s.')
             flog.smite_log.update(ftimeline.now, damage * 2)
             fmob_hp -= damage * 2
-            print(f'Mob HP: {fmob_hp}.')
+            # print(f'Mob HP: {fmob_hp}.')
         else:
-            print(f'Smite hit for {damage} at {ftimeline.now:.2f}s.')
+            # print(f'Smite hit for {damage} at {ftimeline.now:.2f}s.')
             flog.smite_log.update(ftimeline.now, damage)
             fmob_hp -= damage
-            print(f'Mob HP: {fmob_hp}.')
+            # print(f'Mob HP: {fmob_hp}.')
         ftimeline.smite_hit = float('inf')
         ftimeline = next_spell(ftimeline)
         return fmob_hp, ftimeline, flog
@@ -355,13 +355,13 @@ def make_dash(intellect, crit_rating, haste_rating, mastery_rating, versatility_
 
     def kill_one(ftimeline, fmob_num, fpain_dot, fpenance, fdivine_star, flog):
         mob_hp = 500000
-        print(f'Mob {fmob_num} HP: {mob_hp}.')
+        # print(f'Mob {fmob_num} HP: {mob_hp}.')
         ftimeline = next_spell(ftimeline)
         while mob_hp > 0:
             ftimeline.now = next_time_stop()
             mob_hp, ftimeline, fpain_dot, fpenance, fdivine_star, flog = execute_time_stop(mob_hp, ftimeline, fpain_dot,
                                                                                            fpenance, fdivine_star, flog)
-        print(f'Mob {fmob_num} died at {ftimeline.now:.2f}.')
+        # print(f'Mob {fmob_num} died at {ftimeline.now:.2f}.')
         return ftimeline, fmob_num, fpain_dot, fpenance, fdivine_star, flog
 
     haste_percent = 0.04
@@ -391,73 +391,97 @@ def make_dash(intellect, crit_rating, haste_rating, mastery_rating, versatility_
                                figure_maker('Divine Star', logs.divine_star_log, 'white'),
                                figure_maker('SW: Pain', logs.pain_log, '#797a7e')],
                       'layout': {'showlegend': True, 'paper_bgcolor': '#3d3d3d', 'plot_bgcolor': '#D6CCB4',
-                                 'legend': {'font': {'family': 'Shadows Into Light', 'color': '#D8E7EF', 'size': 24}}}}
+                                 'legend': {'font': {'family': 'Shadows Into Light', 'color': '#D8E7EF', 'size': 24},
+                                            'orientation': 'v'}}}
     fig = go.Figure(collective_fig)
-    fig.update_layout(barmode='stack', font_color='#D6CCB4', xaxis={'title': {'text': 'Time (seconds)'}},
-                      yaxis={'title': {'text': 'Damage'}}, title={'text': 'Timeline of Spell Hits', 'xref': 'container',
-                                                                  'x': 0.5, 'font': {'family': 'Shadows Into Light',
-                                                                                     'size': 34}})
+    fig.update_layout(barmode='stack', font_color='#D6CCB4',
+                      xaxis={'title': {'text': 'Time (Seconds)', 'font': {'family': 'Shadows Into Light', 'size': 24}}},
+                      yaxis={'title': {'text': 'Damage', 'font': {'family': 'Shadows Into Light', 'size': 24}}},
+                      title={'text': 'Timeline of Spell Hits', 'xref': 'paper', 'x': 0.5,
+                             'font': {'family': 'Shadows Into Light', 'size': 34}})
     fig.update_traces(marker={'line': {'color': 'black', 'width': 0}})
+    results = ['Time to do 500k damage: ', html.Span(className='time_taken', children=f'{timeline.now:.02f}'),
+               ' seconds',
+               html.Br(),
+               'Average DPS: ', html.Span(className='time_taken', children=f'{500000/timeline.now:,.02f}')]
 
-    return fig
+    return fig, results
 
 
-initial_layout = make_dash(7189, 1273, 473, 716, 331)
+def initial_layout(intel, crit, haste, mastery, versatility):
+    fig, results = make_dash(intel, crit, haste, mastery, versatility)
+    return html.Div(children=[html.H1(className='head',
+                                      children='Disc Priest Damage Simulator'),
+                              html.Div(className='settings',
+                                       id='settings',
+                                       children=['Intellect: ', dcc.Input(className='inputs', id='intellect',
+                                                                          value=7000, type='number', debounce=True),
+                                                 ' Crit Rating: ', dcc.Input(className='inputs', id='crit',
+                                                                             value=1000,
+                                                                             type='number', debounce=True),
+                                                 ' Haste Rating: ', dcc.Input(className='inputs', id='haste',
+                                                                              value=1000, type='number',
+                                                                              debounce=True),
+                                                 ' Mastery Rating: ', dcc.Input(className='inputs', id='mastery',
+                                                                                value=1000, type='number',
+                                                                                debounce=True),
+                                                 ' Versatility Rating: ', dcc.Input(className='inputs',
+                                                                                    id='versatility', value=500,
+                                                                                    type='number', debounce=True)]),
+                              html.Div(className='results',
+                                       id='results',
+                                       children=results),
+                              dcc.Graph(id='example-graph', figure=fig),
+                              html.Div(className='about',
+                                       children=[html.H1('About'),
+                                                 'This app will simulate combat undertaken by a level 120 discipline '
+                                                 'priest in the Battle for Azeroth expansion of World of Warcraft. It '
+                                                 'assists a player in deciding how to gear and distribute their stats '
+                                                 'for maximum effect. Spells are prioritized in the following order: '
+                                                 'Schism, SW: Pain, Penance, Solace, Divine Star, Smite. SW: Pain is '
+                                                 'only cast when it is no longer in effect. The rest are cast when off '
+                                                 'cooldown and according to their priority. This app does not account '
+                                                 'for many talent choices. Note that there is randomness in critical '
+                                                 'hits. Thus, multiple runs with identical stats will likely render '
+                                                 'different results. Also note that this app does not simulate the '
+                                                 'effects of Azerite traits, Corruptions, and a host of trinkets. As '
+                                                 'the variety and magnitudes of such effects are expansive and the end '
+                                                 'of this expansion is imminent, I have no plans of going to the '
+                                                 'effort of adding them.',
+                                                 html.H1('Technical Info'),
+                                                 'The app requires merging multiple overlapping timelines of events, '
+                                                 'finding the next event, creating new events at appropriate time '
+                                                 'stops, erasing past events, calculating the magnitude of spell hits, '
+                                                 'simulating randomness, and determining the next attack to be '
+                                                 'carried out based on those timelines. The page is generated by Dash '
+                                                 'which is akin to a merging of Plotly with Flask. The backend was '
+                                                 'written in Python. For deployment, the '
+                                                 'Dash app was integrated as a directory into a Flask app following '
+                                                 'the Flask Application Factory pattern; thus allowing for easy '
+                                                 'scalability. The app is hosted on a Google Compute Engine running '
+                                                 'Ubuntu 20.04, Nginx, and Gunicorn.'])
+                              ]
+                    )
 
 
-# app = dash.Dash(__name__)
-#
-# collective_fig =
-#
+app = dash.Dash(__name__)
 
-#
-# app.layout = html.Div(children=[html.H1(className='head',
-#                                         children='Disc Priest Damage Simulator'),
-#                                 html.Div(className='settings',
-#                                          id='settings',
-#                                          children=['Intellect: ', dcc.Input(className='inputs', id='intellect',
-#                                                                             value=7000, type='number', debounce=True),
-#                                                    ' Crit Rating: ', dcc.Input(className='inputs', id='crit',
-#                                                                                value=1000,
-#                                                                                type='number', debounce=True),
-#                                                    ' Haste Rating: ', dcc.Input(className='inputs', id='haste',
-#                                                                                 value=1000, type='number',
-#                                                                                 debounce=True),
-#                                                    ' Mastery Rating: ', dcc.Input(className='inputs', id='mastery',
-#                                                                                   value=1000, type='number',
-#                                                                                   debounce=True),
-#                                                    ' Versatility Rating: ', dcc.Input(className='inputs',
-#                                                                                       id='versatility', value=500,
-#                                                                                       type='number', debounce=True)]),
-#                                 html.Div(className='results', children=[f'Time to do 500k damage: {timeline.now:.02f}',
-#                                                                         html.Br(),
-#                                                                         f'Average DPS: {500000/timeline.now:,.02f}']),
-#                                 dcc.Graph(id='example-graph', figure=fig)])
-#
-#
-# # @app.callback(
-# #     Output(component_id='example-graph', component_property='figure'),
-# #     [Input(component_id='intellect', component_property='value')]
-# # )
-# # def update_graph(input_value):
-# #     intellect = input_value
-# #     schism = Spells(1.29, 7.77, 1.5, 24)
-# #     pain_dd = Spells(0.165, 0.858, 0, 0)
-# #     smite = Spells(0.57, 3.26, 1.5, 0)
-# #     solace = Spells(0.829, 5.11, 0, 12)
-# #     pain_dot = Dots(0.992, 1.31, 16, 2, 0, 0)
-# #     penance = Channeled(1.2, 0.726, 3, 2, 9)
-# #     divine_star = Star(0.8, 0, 15)
-# #     collective_fig = {'data': [figure_maker('Schism', logs.schism_log, '#2F2F2F'),
-# #                                figure_maker('Solace', logs.solace_log, 'orange'),
-# #                                figure_maker('Smite', logs.smite_log, '#589B9B'),
-# #                                figure_maker('Penance', logs.penance_log, 'yellow'),
-# #                                figure_maker('Divine Star', logs.divine_star_log, 'white'),
-# #                                figure_maker('SW: Pain', logs.pain_log, '#797a7e')],
-# #                       'layout': {'showlegend': True, 'paper_bgcolor': '#3d3d3d', 'plot_bgcolor': '#D6CCB4',
-# #                                  'legend': {'font': {'family': 'Shadows Into Light', 'color': '#D8E7EF', 'size': 24}}}}
-# #
-# #     fig = go.Figure(collective_fig)
-#
-# if __name__ == '__main__':
-#     app.run_server(debug=True)
+app.layout = initial_layout(7000, 1000, 1000, 500, 500)
+
+
+@app.callback(
+    [Output(component_id='example-graph', component_property='figure'),
+     Output(component_id='results', component_property='children')],
+    [Input(component_id='intellect', component_property='value'),
+     Input(component_id='crit', component_property='value'),
+     Input(component_id='haste', component_property='value'),
+     Input(component_id='mastery', component_property='value'),
+     Input(component_id='versatility', component_property='value')]
+)
+def update_dash(intel, crit, haste, mastery, versatility):
+    fig, now = make_dash(intel, crit, haste, mastery, versatility)
+    return fig, now
+
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
