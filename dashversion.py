@@ -4,14 +4,13 @@ import plotly.graph_objects as go
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.exceptions import PreventUpdate
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 
 
-semdoms_bp = Blueprint('semdoms_bp', __name__,
-                       static_folder='static',
-                       template_folder='templates',
-                       static_url_path='/discsim/static')
+wowsim_bp = Blueprint('wowsim_bp', __name__,
+                      static_folder='static',
+                      template_folder='templates',
+                      static_url_path='/wowsim/static')
 
 
 def figure_maker(fig_name, log_name, bar_color):
@@ -464,7 +463,7 @@ def initial_layout(intel, crit, haste, mastery, versatility):
                     )
 
 
-@semdoms_bp.route('/wowsim', methods=['GET'])
+@wowsim_bp.route('/wowsim', methods=['GET'])
 def create_sim_dash(server):
     """Creates the Wow Sim App dashboard and determines its initial layout."""
     sim_app = dash.Dash(__name__, server=server, routes_pathname_prefix='/wowsim/')
