@@ -467,6 +467,7 @@ def initial_layout(intel, crit, haste, mastery, versatility):
 def create_sim_dash(server):
     """Creates the Wow Sim App dashboard and determines its initial layout."""
     sim_app = dash.Dash(__name__, server=server, routes_pathname_prefix='/wowsim/')
+    sim_app.title = 'BFA Disc Priest Sim'
     sim_app.layout = initial_layout(7000, 1000, 1000, 500, 500)
 
     init_callbacks(sim_app)
